@@ -1,0 +1,6 @@
+set menu_color_normal=black/white
+set menu_color_highlight=white/light-gray
+
+if background_color 0,0,0; then
+  clear
+fi
