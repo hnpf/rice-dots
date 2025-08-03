@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>utilities-terminal</icon>
+	<name>Open Terminal Here</name>
+	<submenu></submenu>
+	<unique-id>1754170399382745-1</unique-id>
+	<command>exo-open --working-directory %f --launch TerminalEmulator</command>
+	<description>Example for a custom action</description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+</action>
+<action>
+	<icon></icon>
+	<name>extract files..</name>
+	<submenu></submenu>
+	<unique-id>1754179332219218-1</unique-id>
+	<command>7zip x</command>
+	<description>7 zip</description>
+	<range>*</range>
+	<patterns>*</patterns>
+</action>
+</actions>
