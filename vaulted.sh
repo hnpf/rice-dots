@@ -6,9 +6,7 @@ YELLOW="\e[33m"
 CYAN="\e[36m"
 RESET="\e[0m"
 BOLD="\e[1m"
-
-echo -e "${CYAN}${BOLD}rei-chan's comfy system setup starting~${RESET}"
-
+echo -e "${CYAN}${BOLD}system setup starting~${RESET}"
 read -p $'\e[33mcontinue? (y/n): \e[0m' confirm
 [[ "$confirm" != "y" ]] && echo -e "${YELLOW}okay then bye~${RESET}" && exit 1
 
@@ -33,7 +31,6 @@ yay -Syu --noconfirm
 # install main packages
 echo -e "${CYAN}installing Jetbrains-Mono...${RESET}"
 yay -S --noconfirm nerd-fonts-jetbrains-mono
-
 echo -e "${CYAN}installing packages...${RESET}"
 packages=(
   thunar
@@ -63,7 +60,6 @@ packages=(
   tela-circle-icon-theme-git
   breezeX-cursor-theme
 )
-
 for pkg in "${packages[@]}"; do
   echo -e "${YELLOW}installing: $pkg${RESET}"
   yay -S --noconfirm --needed "$pkg"
@@ -162,4 +158,4 @@ sudo plymouth-set-default-theme -R breeze-rose-pine-dawn
 echo -e "${GREEN}plymouth theme set to breeze-rose-pine-dawn${RESET}"
 
 # done
-echo -e "${BOLD}${CYAN}all done rei-chan~ reboot if needed (for shell/theme/boot stuff)${RESET}"
+echo -e "${BOLD}${CYAN}all done! reboot if needed (for shell/theme/boot stuff)${RESET}"
