@@ -7,16 +7,30 @@ CYAN="\e[36m"
 RESET="\e[0m"
 BOLD="\e[1m"
 
-echo -e "${CYAN}${BOLD}rei-chan's system setup starting...${RESET}"
+echo -e "${CYAN}${BOLD}rei-chan's comfy system setup starting~${RESET}"
 
-# ask before continuing
-read -p $'\e[33mdo you wanna continue? (y/n): \e[0m' confirm
+read -p $'\e[33mcontinue? (y/n): \e[0m' confirm
 [[ "$confirm" != "y" ]] && echo -e "${YELLOW}okay then bye~${RESET}" && exit 1
 
-echo -e "${GREEN}updating system first...${RESET}"
-sudo pacman -Syu --noconfirm
+# install yay
+if ! command -v yay &>/dev/null; then
+  echo -e "${CYAN}installing yay...${RESET}"
+  sudo pacman -S --needed --noconfirm base-devel git
+  git clone https://aur.archlinux.org/yay.git /tmp/yay
+  cd /tmp/yay && makepkg -si --noconfirm
+  cd ~
+else
+  echo -e "${GREEN}yay already installed${RESET}"
+fi
 
-# install packages
+cd ~
+echo -e "${CYAN}moved back to home directory${RESET}"
+
+# system update
+echo -e "${GREEN}updating system...${RESET}"
+yay -Syu --noconfirm
+
+# install main packages
 echo -e "${CYAN}installing packages...${RESET}"
 packages=(
   thunar
@@ -41,14 +55,18 @@ packages=(
   xfce4-settings
   simple-update-notifier
   sublime-text
+  plymouth
+  gtk-theme-rose-pine-moon
+  tela-circle-icon-theme-git
+  breezeX-cursor-theme
 )
 
 for pkg in "${packages[@]}"; do
   echo -e "${YELLOW}installing: $pkg${RESET}"
-  sudo pacman -S --noconfirm --needed "$pkg"
+  yay -S --noconfirm --needed "$pkg"
 done
 
-# create config directories if they don't exist
+# config copy
 echo -e "${CYAN}copying config files...${RESET}"
 mkdir -p ~/.config
 
@@ -86,25 +104,59 @@ for dir in "${configs[@]}"; do
   fi
 done
 
-# special ones that go directly to home
 [[ -f ".zshrc" ]] && cp .zshrc ~/.zshrc && echo -e "${GREEN}added .zshrc${RESET}"
 
-# sublime-text user config
 if [[ -d "sublime-text/Packages/User" ]]; then
   mkdir -p ~/.config/sublime-text/Packages
   cp -r sublime-text/Packages/User ~/.config/sublime-text/Packages/
   echo -e "${GREEN}sublime-text config copied${RESET}"
 fi
 
-# xfce4 settings
 if [[ -d "xfce4/xfconf/xfce-perchannel-xml" ]]; then
   mkdir -p ~/.config/xfce4/xfconf/
   cp -r xfce4/xfconf/xfce-perchannel-xml ~/.config/xfce4/xfconf/
   echo -e "${GREEN}xfce4 settings copied${RESET}"
 fi
 
-# finishing up
-echo -e "${CYAN}changing shell to zsh...${RESET}"
+# set shell to zsh
+echo -e "${CYAN}setting default shell to zsh...${RESET}"
 chsh -s $(which zsh)
 
-echo -e "${GREEN}${BOLD}setup complete~ reboot if needed :3${RESET}"
+# theme setup
+echo -e "${CYAN}setting GTK theme...${RESET}"
+gsettings set org.gnome.desktop.interface gtk-theme 'rose-pine-moon-gtk'
+gsettings set org.gnome.desktop.interface icon-theme 'Tela-circle-black'
+gsettings set org.gnome.desktop.interface cursor-theme 'BreezeX-RosePine'
+
+echo -e "${GREEN}theme set: gtk + icons + cursor${RESET}"
+
+# boot config
+echo -e "${CYAN}editing bootloader config for splash...${RESET}"
+read -p $'\e[33msystemd-boot? (y/n): \e[0m' usesd
+
+if [[ "$usesd" == "y" ]]; then
+  echo -e "${GREEN}editing systemd-boot config...${RESET}"
+  for entry in /boot/loader/entries/*.conf; do
+    if ! grep -q "quiet" "$entry"; then
+      sudo sed -i '/^options/s/$/ quiet splash/' "$entry"
+      echo -e "${GREEN}added quiet splash to $entry${RESET}"
+    else
+      echo -e "${YELLOW}$entry already has quiet/splash${RESET}"
+    fi
+  done
+elif command -v grub-install &>/dev/null; then
+  echo -e "${GREEN}using grub... editing grub config${RESET}"
+  sudo sed -i 's/^GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="\1 quiet splash"/' /etc/default/grub
+  sudo grub-mkconfig -o /boot/grub/grub.cfg
+  echo -e "${GREEN}grub config updated with quiet splash${RESET}"
+else
+  echo -e "${YELLOW}no bootloader config updated${RESET}"
+fi
+
+# plymouth theme
+echo -e "${CYAN}setting plymouth theme...${RESET}"
+sudo plymouth-set-default-theme -R breeze-rose-pine-dawn
+echo -e "${GREEN}plymouth theme set to breeze-rose-pine-dawn${RESET}"
+
+# done
+echo -e "${BOLD}${CYAN}all done rei-chan~ reboot if needed (for shell/theme/boot stuff)${RESET}"
