@@ -31,6 +31,9 @@ echo -e "${GREEN}updating system...${RESET}"
 yay -Syu --noconfirm
 
 # install main packages
+echo -e "${CYAN}installing Jetbrains-Mono...${RESET}"
+yay -S --noconfirm nerd-fonts-jetbrains-mono
+
 echo -e "${CYAN}installing packages...${RESET}"
 packages=(
   thunar
